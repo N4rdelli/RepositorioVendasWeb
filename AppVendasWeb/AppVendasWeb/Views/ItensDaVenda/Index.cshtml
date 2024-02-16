@@ -1,0 +1,56 @@
+﻿@model IEnumerable<AppVendasWeb.Models.ItemDaVenda>
+
+@{
+    ViewData["Title"] = "Itens das Vendas";
+}
+
+<h1 class="display-5 text-light my-5">Itens das Vendas</h1>
+
+<p>
+    <a asp-action="Create" asp-route-id=@ViewData["VendaId"] class="btn btn-lg btn-outline-light d-inline-flex align-items-center">
+        <svg class="me-3" bootstrap-icon="PlusLg" width="20" height="20" aria-label="Adicionar"></svg> Adicionar
+    </a>
+</p>
+
+<table class="table table-dark table-striped table-hover">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Produto)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Venda)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantidade)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Valor)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Produto.Descricao)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Venda.NotaFiscal)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantidade)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Valor)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ItemDaVendaId">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ItemDaVendaId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

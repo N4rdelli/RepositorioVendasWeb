@@ -1,0 +1,56 @@
+﻿@model IEnumerable<AppVendasWeb.Models.Produto>
+
+@{
+    ViewData["Title"] = "Cadastro de Produtos";
+}
+
+<h1 class="display-5 text-light my-5">Cadastro de Produtos</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-lg btn-outline-light d-inline-flex align-items-center">
+        <svg class="me-3" bootstrap-icon="PlusLg" width="20" height="20" aria-label="Adicionar"></svg> Adicionar
+    </a>
+</p>
+<table class="table table-dark table-striped table-hover">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Descricao)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Preco)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Categoria)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Descricao)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Preco)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Categoria.CategoriaNome)
+                </td>
+                <td class="text-end">
+                    <a class="text-decoration-none link-light" asp-action="Edit" asp-route-id="@item.ProdutoId">
+                        <svg class="mx-2" bootstrap-icon="PencilFill" width="16" height="16" aria-label="Editar"></svg>
+                    </a>
+                    <a class="text-decoration-none link-light" asp-action="Details" asp-route-id="@item.ProdutoId">
+                        <svg class="mx-2" bootstrap-icon="CardList" width="16" height="16" aria-label="Detalhes"></svg>
+                    </a>
+                    <a class="text-decoration-none link-light" asp-action="Delete" asp-route-id="@item.ProdutoId">
+                        <svg class="mx-2" bootstrap-icon="Trash" width="16" height="16" aria-label="Excluir"></svg>
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

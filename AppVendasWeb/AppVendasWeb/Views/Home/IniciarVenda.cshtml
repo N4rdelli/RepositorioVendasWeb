@@ -1,0 +1,309 @@
+﻿@model AppVendasWeb.Models.NovaVenda
+
+@{
+    ViewData["Title"] = "Nova Venda";
+    List<Produto> listaProdutos = (List<Produto>)ViewData["ListaProdutos"];
+    List<Cliente> listaClientes = (List<Cliente>)ViewData["ListaClientes"];
+
+    Produto produto = (Produto)ViewData["ProdutoSelecionado"];
+    List<Produto> listaProdutosSelecionados = new List<Produto>();
+    listaProdutosSelecionados.Add(produto);
+
+    ViewBag.ClienteId = new SelectList(listaClientes.Where(c => c.CadastroAtivo == true), "ClienteId", "ClienteNome");
+}
+
+<h4 class="text-center">Nova Venda</h4>
+<hr />
+<div class="row">
+    <div class="col12">
+        <form asp-action="IniciarVenda">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="row g-2">
+                <div class="col-md">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text p-3">
+                            <label asp-for="NotaFiscal" class="control-label"></label>
+                        </span>
+                        <input asp-for="NotaFiscal" class="form-control p-2 py-3 rounded-end" placeholder="# Automático ao Salvar" readonly />
+                        <span asp-validation-for="NotaFiscal" class="text-danger"></span>
+
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text p-3">
+                            <label asp-for="DataVenda" class="control-label"></label>
+                        </span>
+                        <input asp-for="DataVenda" value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")" class="form-control p-2 py-3 rounded-end" />
+                        <span asp-validation-for="DataVenda" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-2">
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <input id="NomeCliente" name="NomeCliente" class="form-control p-2 py-3 rounded-end" value="@ViewData["ClienteSelecionado"]" readonly />
+                        <input asp-for="ClienteId" type="hidden" />
+                        <span asp-validation-for="ClienteId" class="text-danger"></span>
+                        <button type="button" class="btn btn-outline-light p-2 py-3" data-bs-toggle="modal" data-bs-target="#janelaCliente">
+                            <svg bootstrap-icon="Search" width="20" height="20" aria-label="Pesquisar"></svg> Buscar Cliente
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-2">
+                <div class="col">
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-outline-light w-100 h-100" data-bs-toggle="modal" data-bs-target="#janelaProdutos">
+                        <svg bootstrap-icon="PlusLg" width="20" height="20" aria-label="Pesquisar"></svg> Add Produto
+                    </button>
+                </div>
+                <div class="col">
+                    <div class="form-floating">
+                        <input asp-for="TotalProdutos" id="TotalProdutos" type="number" step="0.01" class="form-control text-dark text-end" value=0.00 />
+                        <label for="TotalProdutos" class="text-dark">Total dos Produtos</label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-floating">
+                        <input asp-for="TotalDesconto" id="TotalDesconto" type="number" step="0.01" value=0.00 class="form-control text-end" />
+                        <label for="TotalDesconto" class="text-dark">Valor de Desconto</label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-floating">
+                        <input asp-for="TotalFinal" id="TotalFinal" type="number" step="0.01" value=0.00 class="form-control text-end h-100" />
+                        <label for="TotalFinal" class="text-dark">Total da Venda</label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success w-100 h-100">
+                            <svg bootstrap-icon="CheckLg" width="20" height="20" aria-label="Pesquisar"></svg>
+                            <br /> Salvar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+        </form>
+    </div>
+</div>
+@{
+
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-center">Produtos Selecionados</h4>
+            <table class="table table-dark text-light">
+                <tr>
+                    <td>
+                        @if (produto != null)
+                        {
+                            <input type="text" name="desc" id="desc" value=@produto.Descricao class="form-control" readonly />
+                        }
+                        else
+                        {
+                            <input type="text" name="desc" id="desc" class="form-control" readonly />
+                        }
+                    </td>
+                    <td>
+                        @if (produto != null)
+                        {
+                            <input type="text" name="preco" id="preco" value="@produto.Preco" class="form-control" readonly />
+                        }
+                        else
+                        {
+                            <input type="number" name="preco" id="preco" step="0.01" class="form-control" />
+                        }
+
+                    </td>
+                    <td>
+                        <input type="text" name="quantidade" id="quantidade" class="form-control" />
+                    </td>
+                    <td>
+                        <input type="text" name="precoTotal" id="precoTotal" class="form-control" readonly />
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+}
+
+<script>
+    // Adiciona um evento de ouvinte para a mudança na quantidade
+    try {
+        document.getElementById('quantidade').addEventListener('focusout', function () {
+            // Obtém o valor da quantidade
+            var quantidade = parseInt(this.value);
+            // Obtém o preço do produto
+            var precoProduto = parseFloat(document.getElementById('preco').value);
+            // Calcula o preço total
+            var precoTotal = quantidade * precoProduto;
+            // Atualiza o preço total na interface do usuário
+            document.getElementById('precoTotal').value = precoTotal.toFixed(2);
+        });
+    } catch (error) {
+        console.log(error);
+    }
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade" id="janelaCliente" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content bg-dark bg-gradient text-light">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Selecione o Cliente</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="buscaCliente"
+                               placeholder="Pesquisar por nome" aria-label="Pesquisar por nome"
+                               aria-describedby="button-addon2">
+                        <a class="btn btn-outline-light" id="button-addon2">
+                            <svg bootstrap-icon="Search" width="16" height="16" aria-label="Pesquisar"></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped table-hover" id="tabelaClientes">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Nome do Cliente
+                                </th>
+                                <th>
+                                    CPF
+                                </th>
+                                <th>
+                                    Selecionar
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in listaClientes)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.ClienteNome)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CPF)
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a class="text-decoration-none link-light" asp-controller="Home" asp-action="SelecionaCliente" asp-route-id="@item.ClienteId" asp-route-id="@item.ClienteId">
+                                            <svg class="mx-2" bootstrap-icon="Check2Square" width="20" height="20" aria-label="Editar"></svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Função para filtrar os clientes na tabela
+    function filtrarClientes() {
+        // Obtém o valor digitado no campo de busca
+        var input = document.querySelector('input[name="buscaCliente"]').value.toUpperCase();
+        // Obtém todas as linhas da tabela
+        var rows = document.querySelectorAll('#tabelaClientes tbody tr');
+        // Percorre todas as linhas da tabela
+        rows.forEach(function (row) {
+            // Obtém o nome do cliente na linha atual
+            var clienteNome = row.querySelector('td:nth-child(1)').textContent.toUpperCase();
+            // Verifica se o nome do cliente contém o valor digitado no campo de busca
+            if (clienteNome.indexOf(input) > -1) {
+                // Se o nome do cliente contiver o valor de busca, exibe a linha
+                row.style.display = '';
+            } else {
+                // Se não, oculta a linha
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Adiciona um evento de clique ao botão de busca
+    document.getElementById('button-addon2').addEventListener('click', filtrarClientes);
+
+    // Adiciona um evento de tecla pressionada ao campo de busca
+    document.querySelector('input[name="buscaCliente"]').addEventListener('keyup', function (event) {
+        // Verifica se a tecla pressionada foi Enter
+        if (event.keyCode === 13) {
+            // Se foi, chama a função de filtragem de clientes
+            filtrarClientes();
+        }
+    });
+</script>
+
+
+<!-- Modal -->
+<div class="modal fade text-dark" id="janelaProdutos" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content bg-dark bg-gradient text-light">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Selecione o Produto</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped table-hover" id="tabelaProdutos">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Produto
+                                </th>
+                                <th>
+                                    Categoria
+                                </th>
+                                <th>
+                                    Valor
+                                </th>
+                                <th>
+                                    Selecionar
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in listaProdutos)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Descricao)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Categoria.CategoriaNome)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Preco)
+                                    </td>
+                                    <td class="text-center">
+                                        <a class="text-decoration-none link-light" asp-controller="Home" asp-action="SelecionaProduto" asp-route-id="@item.ProdutoId">
+                                            <svg class="mx-2" bootstrap-icon="Check2Square" width="20" height="20" aria-label="Editar"></svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
