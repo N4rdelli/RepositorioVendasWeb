@@ -2,33 +2,49 @@
 
 @{
     ViewData["Title"] = "Create";
+    List<Categoria> listaCategorias = (List<Categoria>)ViewData["ListaCategorias"];
+
 }
 
-<h1>Create</h1>
-
-<h4>Produto</h4>
+<h4 class="text-center">Criar Novo Produto</h4>
 <hr />
+
 <div class="row">
-    <div class="col-md-4">
+    <div class="col12">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+
+            <div class="form-group mb-3">
                 <label asp-for="Descricao" class="control-label"></label>
                 <input asp-for="Descricao" class="form-control" />
                 <span asp-validation-for="Descricao" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Preco" class="control-label"></label>
-                <input asp-for="Preco" class="form-control" type="number" step="0.01" />
-                <span asp-validation-for="Preco" class="text-danger"></span>
+
+            <div class="row g-2">
+                <div class="col-md">
+                    <div class="input-group mb-3">
+                        <input id="NomeCategoria" name="NomeCategoria" class="form-control p-2 py-3 rounded-end" value="@ViewData["CategoriaSelecionada"]" readonly />
+                        <input asp-for="CategoriaId" type="hidden" value="@ViewData["IdSelecionada"]" />
+                        <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                        <button type="button" class="btn btn-outline-light p-2 py-3" data-bs-toggle="modal" data-bs-target="#selectCatg">
+                            <svg bootstrap-icon="Search" width="20" height="20" aria-label="Pesquisar"></svg> Buscar Categoria
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="form-group mb-3">
+                        <label asp-for="Preco" class="control-label"></label>
+                        <input asp-for="Preco" class="form-control" type="number" step="0.01" />
+                        <span asp-validation-for="Preco" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md align-content-center">
+                    <div class="form-group mb-3">
+                        <input type="submit" value="Create" class="btn btn-primary" />
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="CategoriaId" class="control-label"></label>
-                <select asp-for="CategoriaId" class="form-control" asp-items="ViewBag.CategoriaId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+
         </form>
     </div>
 </div>
@@ -37,8 +53,89 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+
+<div class="modal fade text-dark" id="selectCatg" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content bg-dark bg-gradient text-light">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Selecione o Produto</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="buscaCategoria" id=
+                               placeholder="Pesquisar categoria" aria-label="Pesquisar categoria"
+                               aria-describedby="button-addon2">
+                        <a class="btn btn-outline-light" id="button-addon2">
+                            <svg bootstrap-icon="Search" width="16" height="16" aria-label="Pesquisar"></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped table-hover" id="tabelaCategorias">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Nome da Categoria
+                                </th>
+                                <th class="text-end">
+                                    Selecionar
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in listaCategorias)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CategoriaNome)
+                                    </td>
+                                    <td>
+                                    <td class="text-center">
+                                        <a class="text-decoration-none link-light" asp-controller="Produtos" asp-action="SelecionaCategoria" asp-route-id="@item.CategoriaId">
+                                            <svg class="mx-2" bootstrap-icon="Check2Square" width="20" height="20" aria-label="Editar"></svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Função para filtrar as categorias na tabela
+    function filtrarCategorias() {
+        var input = document.querySelector('input[name="buscaCategoria"]').value.toUpperCase();
+        var rows = document.querySelectorAll('#tabelaCategorias tbody tr');
+        console.log(input)
+        rows.forEach(function (row) {
+            var categoriaNome = row.querySelector('td:nth-child(1)').textContent.toUpperCase();
+            if (categoriaNome.indexOf(input) > -1) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    document.getElementById('button-addon2').addEventListener('click', filtrarCategorias);
+
+    document.querySelector('input[name="buscaCategoria"]').addEventListener('keyup', function (event) {
+        if (event.keyCode === 13) {
+            filtrarCategorias();
+        }
+    });
+</script>
+
 @section Scripts {
     @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("_ValidationScriptsPartial"); 
+        // await js.RenderPartialAsync("ScriptPartial");
     }
 }
